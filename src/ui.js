@@ -1,5 +1,6 @@
 import { catalog } from "./furniture.js";
 import { shops } from "./search.js";
+import { styles } from "./styles.js";
 
 export class UI {
   constructor(app) {
@@ -7,6 +8,7 @@ export class UI {
     this.$ = (id) => document.getElementById(id);
     this._buildCatalog();
     this._buildShops();
+    this._buildStyles();
     this._wireRoom();
     this._wireSelection();
     this._wireToolbar();
@@ -14,6 +16,58 @@ export class UI {
     this._wireResponsive();
     this._wireScene();
     this._wireRefImage();
+  }
+
+  _buildStyles() {
+    const root = this.$("style-picker");
+    const desc = this.$("style-desc");
+    root.innerHTML = "";
+    for (const s of styles) {
+      const el = document.createElement("button");
+      el.className = "style-chip";
+      el.dataset.styleId = s.id;
+      el.title = s.desc;
+      const swatches = ["walls", "sofa", "darkWood", "accent"]
+        .map((k) => `<span class="swatch" style="background:${k === "walls" ? s.walls : s.palette[k]}"></span>`)
+        .join("");
+      el.innerHTML = `
+        <span class="icon">${s.icon}</span>
+        <span class="label">${s.name}</span>
+        <span class="swatches">${swatches}</span>
+      `;
+      el.addEventListener("click", () => {
+        this.app.scene.applyStyle(s);
+        this._activateStyleChip(s.id);
+        desc.textContent = s.desc;
+        this._refreshShopsForStyle(s);
+        this._toast(`Styl: ${s.name}`);
+      });
+      root.appendChild(el);
+    }
+    // default highlight + shop links for the "current" style
+    this._activateStyleChip(styles[0].id);
+    this._refreshShopsForStyle(styles[0]);
+  }
+
+  _activateStyleChip(id) {
+    const root = this.$("style-picker");
+    root.querySelectorAll(".style-chip").forEach((el) => {
+      el.classList.toggle("active", el.dataset.styleId === id);
+    });
+  }
+
+  _refreshShopsForStyle(style) {
+    const root = this.$("quick-shops");
+    if (!root) return;
+    root.innerHTML = "";
+    for (const s of shops) {
+      const a = document.createElement("a");
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.href = s.url(style.shop);
+      a.innerHTML = `<span class="shop-dot" style="background:${s.color}"></span>${s.label}`;
+      root.appendChild(a);
+    }
   }
 
   _buildCatalog() {
@@ -58,6 +112,7 @@ export class UI {
   }
 
   _buildShops() {
+    // initial fill — will be re-filled when a style is selected
     const root = this.$("quick-shops");
     root.innerHTML = "";
     for (const s of shops) {

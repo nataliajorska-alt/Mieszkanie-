@@ -435,6 +435,197 @@ const builders = {
     builders.shelf(g, p);
   },
 
+  mirrorRound(g, p) {
+    const { w, color } = p;
+    const r = w / 2;
+    const ringGeom = new THREE.TorusGeometry(r, 0.04, 16, 48);
+    const ring = new THREE.Mesh(ringGeom, new THREE.MeshStandardMaterial({
+      color, roughness: 0.3, metalness: 0.6,
+    }));
+    g.add(ring);
+    const glass = new THREE.Mesh(
+      new THREE.CircleGeometry(r - 0.02, 48),
+      new THREE.MeshPhysicalMaterial({ color: 0xeaf2f7, roughness: 0.05, metalness: 0.9 })
+    );
+    glass.position.z = 0.005;
+    g.add(glass);
+  },
+
+  tvCabinet(g, p) {
+    const { w, h, d, color } = p;
+    const top = box(w, 0.04, d, color, { roughness: 0.4 });
+    top.position.y = h - 0.02;
+    g.add(top);
+    const body = box(w, h - 0.16, d, color);
+    body.position.y = (h - 0.16) / 2 + 0.12;
+    g.add(body);
+    // doors
+    const doorW = w / 3 - 0.01;
+    for (let i = 0; i < 3; i++) {
+      const door = box(doorW, h - 0.22, 0.02, lighten(color, 0.06));
+      door.position.set((i - 1) * (w / 3), (h - 0.22) / 2 + 0.14, d / 2 + 0.012);
+      g.add(door);
+      const handle = cylinder(0.008, 0.06, "#c8a050");
+      handle.rotation.x = Math.PI / 2;
+      handle.position.set((i - 1) * (w / 3) + doorW / 2 - 0.04, (h - 0.22) / 2 + 0.14, d / 2 + 0.04);
+      g.add(handle);
+    }
+    // legs
+    legBlock(g, w * 0.96, d * 0.92, 0.10, "#1a1a1a", 0.04);
+  },
+
+  sideTable(g, p) {
+    const { w, h, color } = p;
+    const top = cylinder(w / 2, 0.04, color, { roughness: 0.4 });
+    top.position.y = h - 0.02;
+    g.add(top);
+    const pole = cylinder(0.02, h - 0.04, "#1a1a1a", { roughness: 0.3, metalness: 0.7 });
+    pole.position.y = (h - 0.04) / 2;
+    g.add(pole);
+    const base = cylinder(w / 2 * 0.55, 0.02, "#1a1a1a", { roughness: 0.4, metalness: 0.7 });
+    base.position.y = 0.01;
+    g.add(base);
+  },
+
+  vase(g, p) {
+    const { w, h, color } = p;
+    const r = w / 2;
+    const profile = [];
+    const segs = 16;
+    for (let i = 0; i <= segs; i++) {
+      const t = i / segs;
+      const y = t * h;
+      const wave = Math.sin(t * Math.PI) * 0.7 + 0.5;
+      const rr = r * (0.4 + 0.6 * wave);
+      profile.push(new THREE.Vector2(rr, y));
+    }
+    const geom = new THREE.LatheGeometry(profile, 32);
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.15 });
+    const m = new THREE.Mesh(geom, mat);
+    m.castShadow = true;
+    g.add(m);
+  },
+
+  artLarge(g, p) {
+    const { w, h, color } = p;
+    const frame = box(w, h, 0.04, "#2a1c10", { roughness: 0.5 });
+    g.add(frame);
+    // abstract canvas (3 colour blocks)
+    const cw = w * 0.92, ch = h * 0.92;
+    const canvas = new THREE.Mesh(
+      new THREE.PlaneGeometry(cw, ch),
+      new THREE.MeshStandardMaterial({ color: lighten(color, 0.2), roughness: 0.95 })
+    );
+    canvas.position.z = 0.022;
+    g.add(canvas);
+    const block1 = new THREE.Mesh(
+      new THREE.PlaneGeometry(cw * 0.5, ch * 0.45),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.95 })
+    );
+    block1.position.set(-cw * 0.18, ch * 0.15, 0.024);
+    g.add(block1);
+    const block2 = new THREE.Mesh(
+      new THREE.PlaneGeometry(cw * 0.4, ch * 0.3),
+      new THREE.MeshStandardMaterial({ color: lighten(color, -0.2), roughness: 0.95 })
+    );
+    block2.position.set(cw * 0.18, -ch * 0.18, 0.024);
+    g.add(block2);
+  },
+
+  artBotanic(g, p) {
+    const { w, h, color } = p;
+    const frame = box(w, h, 0.04, "#d4b885", { roughness: 0.5 });
+    g.add(frame);
+    const canvas = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * 0.9, h * 0.9),
+      new THREE.MeshStandardMaterial({ color: "#f5f0e4", roughness: 0.95 })
+    );
+    canvas.position.z = 0.022;
+    g.add(canvas);
+    // a few leaf-ish brushstrokes
+    for (let i = 0; i < 6; i++) {
+      const leafColor = lighten(color, (i % 2 === 0) ? 0 : -0.15);
+      const leaf = new THREE.Mesh(
+        new THREE.CircleGeometry(0.04 + Math.random() * 0.05, 16),
+        new THREE.MeshStandardMaterial({ color: leafColor, roughness: 0.95 })
+      );
+      leaf.position.set(
+        (Math.random() - 0.5) * w * 0.7,
+        (Math.random() - 0.4) * h * 0.7,
+        0.024
+      );
+      leaf.scale.y = 1.6;
+      leaf.rotation.z = Math.random() * Math.PI;
+      g.add(leaf);
+    }
+  },
+
+  clock(g, p) {
+    const { w, color } = p;
+    const r = w / 2;
+    const ring = new THREE.Mesh(
+      new THREE.CylinderGeometry(r, r, 0.04, 32),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.5 })
+    );
+    ring.rotation.x = Math.PI / 2;
+    g.add(ring);
+    const face = new THREE.Mesh(
+      new THREE.CircleGeometry(r * 0.92, 32),
+      new THREE.MeshStandardMaterial({ color: "#f5f1e8", roughness: 0.6 })
+    );
+    face.position.z = 0.022;
+    g.add(face);
+    // ticks
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      const tick = new THREE.Mesh(
+        new THREE.BoxGeometry(0.014, 0.05, 0.005),
+        new THREE.MeshStandardMaterial({ color: "#222" })
+      );
+      tick.position.set(Math.cos(a) * r * 0.78, Math.sin(a) * r * 0.78, 0.024);
+      g.add(tick);
+    }
+    // hands
+    const hourHand = new THREE.Mesh(
+      new THREE.BoxGeometry(0.012, r * 0.5, 0.005),
+      new THREE.MeshStandardMaterial({ color: "#222" })
+    );
+    hourHand.position.set(0, r * 0.2, 0.026);
+    g.add(hourHand);
+    const minHand = new THREE.Mesh(
+      new THREE.BoxGeometry(0.008, r * 0.75, 0.005),
+      new THREE.MeshStandardMaterial({ color: "#222" })
+    );
+    minHand.rotation.z = Math.PI / 6;
+    minHand.position.set(0.04, r * 0.3, 0.027);
+    g.add(minHand);
+  },
+
+  cornerSofa(g, p) {
+    const { w, h, d, color } = p;
+    // L-shape: long part along X, returning along -Z on right
+    builders.sofa(g, { w, h, d, color });
+    // Add a chaise extension on the +X side, going forward (+Z)
+    const ext = new THREE.Group();
+    builders.sofa(ext, { w: d * 1.4, h, d, color });
+    ext.rotation.y = Math.PI / 2;
+    ext.position.set(w / 2 + (d * 1.4) / 2, 0, d / 2 - (d * 1.4) / 2);
+    g.add(ext);
+  },
+
+  candle(g, p) {
+    const { w, h, color } = p;
+    const stand = cylinder(w / 2, 0.02, "#c8a050", { metalness: 0.7, roughness: 0.3 });
+    stand.position.y = 0.01;
+    g.add(stand);
+    const wax = cylinder(w / 2 * 0.7, h - 0.02, color, { roughness: 0.6 });
+    wax.position.y = (h - 0.02) / 2 + 0.02;
+    g.add(wax);
+    const flame = new THREE.PointLight(0xffaa55, 0.3, 2, 2);
+    flame.position.y = h + 0.04;
+    g.add(flame);
+  },
+
   wardrobe(g, p) {
     const { w, h, d, color } = p;
     const body = box(w, h, d, color);
@@ -569,6 +760,42 @@ export const catalog = [
   { id: "bed", name: "Łóżko 160", category: "Sypialnia", icon: "🛏️",
     size: { w: 1.6, d: 2.0, h: 0.55 }, color: "#5a4a3a",
     search: "łóżko 160 z zagłówkiem", build: "bed" },
+
+  // dodatkowe siedziska / stoły
+  { id: "sofa-corner", name: "Narożnik L", category: "Siedziska", icon: "🛋️",
+    size: { w: 2.6, d: 1.0, h: 0.85 }, color: "#dcd2c0",
+    search: "narożnik salon L kształt", build: "cornerSofa" },
+  { id: "side-table", name: "Stolik pomocniczy", category: "Stoły", icon: "🟤",
+    size: { w: 0.42, d: 0.42, h: 0.55 }, color: "#3a2410",
+    search: "stolik pomocniczy okrągły mały", build: "sideTable" },
+  { id: "rtv-stand", name: "Szafka RTV", category: "Multimedia", icon: "📼",
+    size: { w: 1.6, d: 0.4, h: 0.5 }, color: "#3a2410",
+    search: "szafka rtv niska drewniana", build: "tvCabinet" },
+
+  // dekoracje (więcej)
+  { id: "mirror-round", name: "Lustro okrągłe", category: "Dekoracje", icon: "🪩",
+    size: { w: 0.9, d: 0.06, h: 0.9 }, color: "#c8a050",
+    search: "lustro okrągłe ścienne złote", build: "mirrorRound", anchor: "wall", wallY: 1.4 },
+  { id: "art-abstract", name: "Obraz abstrakcyjny", category: "Dekoracje", icon: "🎨",
+    size: { w: 1.0, d: 0.04, h: 0.7 }, color: "#3d5a78",
+    search: "obraz abstrakcyjny duży na ścianę", build: "artLarge", anchor: "wall", wallY: 1.6 },
+  { id: "art-botanic", name: "Plakat botaniczny", category: "Dekoracje", icon: "🌿",
+    size: { w: 0.5, d: 0.04, h: 0.7 }, color: "#5a7548",
+    search: "plakat botaniczny rama", build: "artBotanic", anchor: "wall", wallY: 1.5 },
+  { id: "vase", name: "Wazon", category: "Dekoracje", icon: "🏺",
+    size: { w: 0.22, d: 0.22, h: 0.45 }, color: "#c2a884",
+    search: "wazon ceramiczny dekoracyjny", build: "vase" },
+  { id: "clock", name: "Zegar ścienny", category: "Dekoracje", icon: "🕐",
+    size: { w: 0.45, d: 0.04, h: 0.45 }, color: "#222222",
+    search: "zegar ścienny okrągły", build: "clock", anchor: "wall", wallY: 1.7 },
+  { id: "candle", name: "Świeca dekor.", category: "Dekoracje", icon: "🕯️",
+    size: { w: 0.1, d: 0.1, h: 0.18 }, color: "#f0e8d8",
+    search: "świeca zapachowa dekoracyjna", build: "candle" },
+
+  // dywany dodatkowe
+  { id: "rug-pattern", name: "Dywan wzorzysty", category: "Dekoracje", icon: "🟪",
+    size: { w: 2.4, d: 1.6, h: 0.01 }, color: "#7a4a3a",
+    search: "dywan wzorzysty perski boho", build: "rug" },
 ];
 
 export function buildFurniture(item, overrides = {}) {

@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Room } from "./room.js";
 import { buildFurniture, rebuildFurniture, catalog } from "./furniture.js";
+import { roleFor } from "./styles.js";
 
 export class SceneApp {
   constructor(canvas) {
@@ -366,6 +367,25 @@ export class SceneApp {
       obj.rotation.y = it.rotation || 0;
       this.objects.add(obj);
     }
+    this._emit("change");
+  }
+
+  applyStyle(style) {
+    if (!style) return;
+    this.room.setConfig({
+      wallColor: style.walls,
+      floorStyle: style.floor,
+    });
+    for (const obj of this.objects.children) {
+      const role = roleFor(obj.userData);
+      if (!role) continue;
+      const colour = style.palette[role];
+      if (!colour) continue;
+      rebuildFurniture(obj, { color: colour });
+    }
+    if (this.selection) this._selectionBox.setFromObject(this.selection);
+    this._currentStyleId = style.id;
+    this._emit("styleApplied", style);
     this._emit("change");
   }
 

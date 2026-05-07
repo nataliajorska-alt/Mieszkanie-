@@ -86,6 +86,45 @@ export const defaultLayout = {
       size: { w: 0.7, d: 0.2, h: 1.0 },
       color: "#f0ead6",
     },
+    // tall floor mirror in the corner near the bedroom door
+    {
+      catalogId: "mirror",
+      position: { x: 1.4, y: 0.8, z: -2.05 },
+      rotation: -Math.PI / 4,
+      size: { w: 0.55, d: 0.05, h: 1.6 },
+      color: "#3a2a1a",
+    },
+    // small side table next to the armchair, holding a vase
+    {
+      catalogId: "side-table",
+      position: { x: 0.4, y: 0, z: -2.2 },
+      rotation: 0,
+      size: { w: 0.42, d: 0.42, h: 0.55 },
+      color: "#3a2410",
+    },
+    {
+      catalogId: "vase",
+      position: { x: 0.4, y: 0.55, z: -2.2 },
+      rotation: 0,
+      size: { w: 0.22, d: 0.22, h: 0.45 },
+      color: "#c2a884",
+    },
+    // a small picture above the TV
+    {
+      catalogId: "picture",
+      position: { x: -1.0, y: 1.85, z: -2.55 },
+      rotation: 0,
+      size: { w: 0.5, d: 0.04, h: 0.4 },
+      color: "#a8855e",
+    },
+    // wall clock on the right side wall
+    {
+      catalogId: "clock",
+      position: { x: 1.74, y: 1.7, z: -0.5 },
+      rotation: -Math.PI / 2,
+      size: { w: 0.45, d: 0.04, h: 0.45 },
+      color: "#222222",
+    },
     // easel
     {
       catalogId: "easel",

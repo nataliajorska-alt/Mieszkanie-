@@ -253,6 +253,36 @@ label > input[type="file"] { padding: 4px; font-size: 11px; }
 .shops a:hover { border-color: var(--accent); }
 .shop-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
 
+.styles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.style-chip {
+  background: #11141b;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  text-align: left;
+  transition: border-color .15s ease, background .15s ease, transform .05s ease;
+}
+.style-chip:hover { border-color: var(--accent); background: #161a23; }
+.style-chip:active { transform: translateY(1px); }
+.style-chip.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, #2a2418 0%, #1c1810 100%);
+  box-shadow: inset 0 0 0 1px rgba(233, 185, 107, 0.3);
+}
+.style-chip .icon { font-size: 18px; flex: 0 0 auto; }
+.style-chip .swatches { display: flex; gap: 2px; margin-left: auto; }
+.style-chip .swatch { width: 8px; height: 16px; border-radius: 2px; }
+
 .help { margin: 0; padding-left: 18px; line-height: 1.6; }
 .help b { color: var(--text); font-weight: 600; }
 
