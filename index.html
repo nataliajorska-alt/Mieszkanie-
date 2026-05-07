@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Moje Mieszkanie 3D — wizualizator salonu</title>
+    <meta name="description" content="Interaktywny wizualizator salonu 3D — projektuj, dodawaj meble, szukaj w sklepach internetowych." />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">🏠</span>
+        <div class="brand-text">
+          <h1>Moje Mieszkanie 3D</h1>
+          <p>Projektuj salon, dodawaj meble, szukaj inspiracji</p>
+        </div>
+      </div>
+      <nav class="topbar-actions">
+        <button id="btn-view-3d" class="chip active" title="Widok 3D (1)">3D</button>
+        <button id="btn-view-top" class="chip" title="Widok z góry (2)">Z góry</button>
+        <span class="sep"></span>
+        <button id="btn-undo" class="chip" title="Cofnij (Ctrl+Z)">↶</button>
+        <button id="btn-redo" class="chip" title="Ponów (Ctrl+Shift+Z)">↷</button>
+        <span class="sep"></span>
+        <button id="btn-save" class="chip primary" title="Zapisz aranżację">💾 Zapisz</button>
+        <button id="btn-load" class="chip" title="Wczytaj aranżację">📂 Wczytaj</button>
+        <button id="btn-reset" class="chip ghost" title="Wczytaj domyślny układ z mojego salonu">↺ Reset</button>
+        <button id="btn-screenshot" class="chip" title="Zrzut ekranu">📸</button>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar" id="sidebar">
+        <section class="panel">
+          <header class="panel-head">
+            <h2>Pokój</h2>
+          </header>
+          <div class="panel-body grid-2">
+            <label>Szerokość (m)
+              <input id="room-width" type="number" min="2" max="12" step="0.1" value="3.6" />
+            </label>
+            <label>Długość (m)
+              <input id="room-length" type="number" min="2" max="14" step="0.1" value="5.2" />
+            </label>
+            <label>Wysokość (m)
+              <input id="room-height" type="number" min="2.2" max="4" step="0.05" value="2.6" />
+            </label>
+            <label>Kolor ścian
+              <input id="wall-color" type="color" value="#f5f1ea" />
+            </label>
+            <label class="full">Podłoga
+              <select id="floor-style">
+                <option value="herringbone" selected>Jodełka — dąb (jak teraz)</option>
+                <option value="planks">Deska klasyczna</option>
+                <option value="tile">Płytki</option>
+                <option value="carpet">Wykładzina / dywan</option>
+              </select>
+            </label>
+            <label class="full">
+              <span>Zdjęcie referencyjne (opcjonalnie)</span>
+              <input id="ref-image" type="file" accept="image/*" />
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <header class="panel-head">
+            <h2>Katalog mebli</h2>
+            <input id="catalog-filter" type="search" placeholder="Filtruj…" />
+          </header>
+          <div id="catalog" class="catalog"></div>
+        </section>
+
+        <section class="panel" id="selection-panel" hidden>
+          <header class="panel-head">
+            <h2>Zaznaczony obiekt</h2>
+            <button id="btn-deselect" class="chip ghost small">×</button>
+          </header>
+          <div class="panel-body">
+            <div class="selection-info">
+              <strong id="sel-name">—</strong>
+              <span id="sel-dims" class="muted"></span>
+            </div>
+            <div class="grid-3">
+              <label>X (m)<input id="sel-x" type="number" step="0.05" /></label>
+              <label>Z (m)<input id="sel-z" type="number" step="0.05" /></label>
+              <label>Obrót°<input id="sel-rot" type="number" step="5" /></label>
+              <label>Szer.<input id="sel-w" type="number" step="0.05" min="0.1" /></label>
+              <label>Gł.<input id="sel-d" type="number" step="0.05" min="0.1" /></label>
+              <label>Wys.<input id="sel-h" type="number" step="0.05" min="0.1" /></label>
+            </div>
+            <label class="full">Kolor
+              <input id="sel-color" type="color" />
+            </label>
+            <div class="row">
+              <button id="btn-duplicate" class="chip">⎘ Duplikuj</button>
+              <button id="btn-delete" class="chip danger">🗑 Usuń</button>
+            </div>
+            <div class="row">
+              <button id="btn-search" class="chip primary full-w">🔎 Szukaj w sklepach</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <header class="panel-head">
+            <h2>Inspiracje &amp; sklepy</h2>
+          </header>
+          <div class="panel-body">
+            <p class="muted small">Szybkie linki — wyszukaj w polskich sklepach to, co masz w salonie:</p>
+            <div id="quick-shops" class="shops"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <header class="panel-head">
+            <h2>Pomoc</h2>
+          </header>
+          <div class="panel-body small muted">
+            <ul class="help">
+              <li><b>Lewy przycisk myszy</b> — obrót kamery</li>
+              <li><b>Prawy / dwa palce</b> — przesuwanie</li>
+              <li><b>Scroll / pinch</b> — zoom</li>
+              <li><b>Klik w mebel</b> — zaznaczenie</li>
+              <li><b>Przeciągnij</b> zaznaczony mebel po podłodze</li>
+              <li><b>R</b> — obróć o 15°, <b>Shift+R</b> — w drugą stronę</li>
+              <li><b>Del / Backspace</b> — usuń</li>
+              <li><b>Ctrl+D</b> — duplikuj</li>
+            </ul>
+          </div>
+        </section>
+      </aside>
+
+      <section class="viewport">
+        <canvas id="canvas"></canvas>
+        <div id="hud" class="hud">
+          <span id="hud-tip">Kliknij mebel z katalogu, aby dodać go do salonu.</span>
+        </div>
+        <button id="btn-toggle-sidebar" class="fab" title="Pokaż / ukryj panel">☰</button>
+      </section>
+    </main>
+
+    <dialog id="dialog-search" class="dialog">
+      <form method="dialog">
+        <header>
+          <h3>Szukaj: <span id="search-title">mebel</span></h3>
+        </header>
+        <p class="muted small">Otwórz wyszukiwanie w wybranym sklepie:</p>
+        <div id="search-links" class="shops"></div>
+        <menu>
+          <button class="chip" value="close">Zamknij</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
